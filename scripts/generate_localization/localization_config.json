@@ -1,0 +1,15 @@
+{
+    "ignored_files": [
+        "lib/ui/utils/theme/app_strings.g.dart",
+        "lib/generated/",
+        "lib/framework/provider/network/network_exceptions.dart"
+    ],
+    "ignored_strings": [
+        "Unix timestamp",
+        "yyyy-MM-dd",
+        "en"
+    ],
+    "ignored_patterns": [
+        "^\\d+$"
+    ]
+}
