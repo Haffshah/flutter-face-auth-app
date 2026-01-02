@@ -7,7 +7,6 @@ Welcome to the automation hub of the **Face Match** project. This directory cont
 | Tool | Type | Directory | Purpose |
 | :--- | :--- | :--- | :--- |
 | **Localization Generator** | Dart | `generate_localization/` | Automates internationalization (i18n) and key generation. |
-| **Image Optimizer** | Bash/Dart | `image_optimization/` | Compresses images to WebP and updates code references. |
 | **Opacity Converter** | Dart | Root of `scripts/` | Optimizes UI performance by replacing opacity calls. |
 
 ---
@@ -35,42 +34,7 @@ dart run scripts/generate_localization/generate_localization.dart
 
 ---
 
-## 🖼️ 2. Image Optimization
-
-**Directory**: `scripts/image_optimization/`
-
-### 📂 File Structure & Purpose
-- **`optimize_images.sh`**: A Bash script that uses `cwebp` to convert high-res PNGs into optimized WebP format.
-- **`update_image_refs.dart`**: A Dart script that scans your `lib/` folder and updates all file path references (e.g., sticking `.png` -> `.webp`).
-- **`check_images.sh`**: A helper script to analyze image sizes before/after optimization.
-- **`IMAGE_OPTIMIZATION_GUIDE.md`**: Comprehensive guide on how to use these tools.
-
-### ⚙️ Setup & File Placement
-1.  **Input Images**: Place your raw, high-quality PNG images in `assets/project_mockup/` (or modify the script path).
-2.  **Output**: The script replaces these files with optimized `.webp` versions and creates a **backup** of originals in `assets/project_mockup_backup_<date>/`.
-
-### 🚀 Usage
-Perform the optimization in two steps:
-
-**Step 1: Compress Images**
-```bash
-# Make executable (first time only)
-chmod +x scripts/image_optimization/optimize_images.sh
-
-# Run optimization
-./scripts/image_optimization/optimize_images.sh
-```
-
-**Step 2: Update Code References**
-```bash
-dart run scripts/image_optimization/update_image_refs.dart
-```
-
-[👉 **Read the Full Image Optimization Guide**](image_optimization/IMAGE_OPTIMIZATION_GUIDE.md)
-
----
-
-## 🎨 3. Opacity Converter
+## 🎨 2. Opacity Converter
 
 **File**: `scripts/opacity_converter.dart`
 
@@ -84,6 +48,8 @@ This is a standalone performance utility. It scans your Flutter code for `.withO
 ```bash
 dart run scripts/opacity_converter.dart
 ```
+
+
 
 
 

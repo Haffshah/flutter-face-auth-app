@@ -46,7 +46,7 @@ You can customize what the script specifically ignores by editing **`localizatio
 Execute the script from the project root:
 
 ```bash
-dart scripts/generate_localization.dart
+dart run scripts/generate_localization/generate_localization.dart
 ```
 
 The script will:

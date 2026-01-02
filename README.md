@@ -1,10 +1,12 @@
-# Flutter Face Auth App 🚀
+# Flutter Face Match 🚀
 
 A cutting-edge Flutter application showcasing high-performance **Face Recognition and Matching** using a hybrid approach combining TensorFlow Lite and Regula FaceSDK.
 
 ## ✨ Key Features
 
-- 👤 **User Registration**: Register users with their name and face image.
+- 👤 **User Management**:
+    - **Registration**: Register users with their name and face image.
+    - **Editing**: Update user names or retake profile photos seamlessly.
 - 📸 **Dual Capture Modes**: 
     - **Guided Camera**: Capture faces with precise guidance using Regula FaceSDK.
     - **Gallery Import**: Pick existing photos for registration.
@@ -35,7 +37,7 @@ A cutting-edge Flutter application showcasing high-performance **Face Recognitio
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Flutter Channel stable, 3.38.3
+- Flutter Channel stable, 3.10+
 - Android Studio / Xcode
 - Physical device recommended (required for Camera/Face SDK functionality).
 
@@ -43,8 +45,8 @@ A cutting-edge Flutter application showcasing high-performance **Face Recognitio
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/Haffshah/face-match.git
-   cd face-match
+   git clone https://github.com/Haffshah/flutter-face-auth-app.git
+   cd flutter-face-auth-app
    ```
 
 2. **Install Dependencies**:
@@ -101,24 +103,13 @@ For full documentation and advanced configuration, see [**scripts/README.md**](s
 dart run scripts/generate_localization/generate_localization.dart
 ```
 
-### 🖼️ Image Optimization
-**What it does**: Compresses PNG assets to WebP format (reducing size by ~80%) and automatically updates your Dart code references.
-**Full Guide**: [image_optimization/IMAGE_OPTIMIZATION_GUIDE.md](scripts/image_optimization/IMAGE_OPTIMIZATION_GUIDE.md)
-**Commands**:
-```bash
-# 1. Optimize Images
-chmod +x scripts/image_optimization/optimize_images.sh && ./scripts/image_optimization/optimize_images.sh
-
-# 2. Update Code References
-dart run scripts/image_optimization/update_image_refs.dart
-```
-
 ### 🎨 Opacity Converter
 **What it does**: Optimizes rendering performance by converting expensive `.withOpacity()` calls to `.withAlpha()`.
 **Command**:
 ```bash
 dart run scripts/opacity_converter.dart
 ```
+
 
 ## 🏗 Project Structure
 
