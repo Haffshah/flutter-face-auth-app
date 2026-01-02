@@ -1,8 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'dart:convert';
 
 void main() {
-  print('Starting localization extraction and replacement...');
+  print('Starting Keyify...');
 
   final rootDir = Directory.current.path;
   final libDir = Directory('lib');
@@ -14,11 +16,32 @@ void main() {
   }
 
   // 1. Load configuration
+  String packageName = 'face_match'; // Default
+  final pubspecFile = File('pubspec.yaml');
+  if (pubspecFile.existsSync()) {
+    try {
+      final lines = pubspecFile.readAsLinesSync();
+      for (final line in lines) {
+        if (line.trim().startsWith('name:')) {
+          packageName = line.split(':')[1].trim();
+          print('Detected package name: $packageName');
+          break;
+        }
+      }
+    } catch (e) {
+      print('Error reading pubspec.yaml: $e');
+    }
+  } else {
+    print(
+      'Warning: pubspec.yaml not found. Using default package name: "$packageName"',
+    );
+  }
+
   List<String> configIgnoredFiles = [];
   List<String> configIgnoredStrings = [];
   List<String> configIgnoredPatterns = [];
 
-  final configFile = File('scripts/localization_config.json');
+  final configFile = File('generate_localization/localization_config.json');
   if (configFile.existsSync()) {
     try {
       final configJson = json.decode(configFile.readAsStringSync());
@@ -29,7 +52,9 @@ void main() {
         configIgnoredStrings = List<String>.from(configJson['ignored_strings']);
       }
       if (configJson['ignored_patterns'] != null) {
-        configIgnoredPatterns = List<String>.from(configJson['ignored_patterns']);
+        configIgnoredPatterns = List<String>.from(
+          configJson['ignored_patterns'],
+        );
       }
       print('Loaded configuration from ${configFile.path}');
     } catch (e) {
@@ -110,21 +135,31 @@ void main() {
 
   // Patterns
   // 1. Text('string') or Text("string")
-  final textPattern = RegExp(r"Text\(\s*(?:'([^'\\]*(?:\\.[^'\\]*)*)'|" + '"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)")');
+  final textPattern = RegExp(
+    r"Text\(\s*(?:'([^'\\]*(?:\\.[^'\\]*)*)'|" +
+        '"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)")',
+  );
   // 2. Named Args including buttonText
   final namedArgPattern = RegExp(
     r"(?:text|hintText|labelText|errorText|label|title|subtitle|tooltip|message|semanticLabel|buttonText|description)\s*:\s*(?:'([^'\\]*(?:\\.[^'\\]*)*)'|" +
         '"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)")',
   );
   // 3. Return string literals (validation)
-  final returnPattern = RegExp(r"return\s+(?:'([^'\\]*(?:\\.[^'\\]*)*)'|" + '"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)")');
+  final returnPattern = RegExp(
+    r"return\s+(?:'([^'\\]*(?:\\.[^'\\]*)*)'|" +
+        '"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)")',
+  );
   // 4. Null coalescing strings: ?? 'string'
-  final nullCoalescingPattern = RegExp(r"\?\?\s*(?:'([^'\\]*(?:\\.[^'\\]*)*)'|" + '"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)")');
+  final nullCoalescingPattern = RegExp(
+    r"\?\?\s*(?:'([^'\\]*(?:\\.[^'\\]*)*)'|" +
+        '"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)")',
+  );
 
   int totalFound = 0;
   int totalAdded = 0;
   int totalIgnored = 0;
   int totalReplaced = 0;
+  Set<String> ignoredLog = {};
 
   void processFile(File file) {
     String content = file.readAsStringSync();
@@ -135,7 +170,9 @@ void main() {
       ...textPattern.allMatches(content).map((m) => MatchInfo(m, true)),
       ...namedArgPattern.allMatches(content).map((m) => MatchInfo(m, false)),
       ...returnPattern.allMatches(content).map((m) => MatchInfo(m, false)),
-      ...nullCoalescingPattern.allMatches(content).map((m) => MatchInfo(m, false)),
+      ...nullCoalescingPattern
+          .allMatches(content)
+          .map((m) => MatchInfo(m, false)),
     ];
 
     for (final info in allMatches) {
@@ -158,6 +195,7 @@ void main() {
       // Filters
       if (processed.trim().isEmpty || processed.length < 2) {
         totalIgnored++;
+        if (processed.trim().isNotEmpty) ignoredLog.add(processed);
         continue;
       }
       bool ignore = false;
@@ -169,17 +207,19 @@ void main() {
       }
       if (exactIgnore.contains(processed)) ignore = true;
       if (processed.contains('/')) {
-        if (processed.startsWith('assets/') || processed.startsWith('lib/') || processed.contains('.')) {
+        if (processed.startsWith('assets/') ||
+            processed.startsWith('lib/') ||
+            processed.contains('.')) {
           if (!processed.contains(' ')) ignore = true;
         }
       }
 
       if (ignore) {
         totalIgnored++;
+        ignoredLog.add(processed);
         continue;
       }
 
-      // Generate Key
       String key;
       if (valueToKey.containsKey(processed)) {
         key = valueToKey[processed]!;
@@ -188,8 +228,29 @@ void main() {
         // Check Conflict
         if (currentJson.containsKey(key)) {
           if (currentJson[key] != processed) {
-            print('[Conflict] Key "$key" exists with different value. Skipping "$processed"');
-            continue;
+            // Conflict logic: Append number until unique or match found
+            int counter = 2;
+            String baseKey = key;
+            bool resolved = false;
+            while (!resolved) {
+              String candidateKey = '${baseKey}_$counter';
+              if (currentJson.containsKey(candidateKey)) {
+                if (currentJson[candidateKey] == processed) {
+                  key = candidateKey; // Found existing match
+                  resolved = true;
+                } else {
+                  counter++; // Conflict again, try next
+                }
+              } else {
+                // New distinct key derived from base
+                key = candidateKey;
+                currentJson[key] = processed;
+                valueToKey[processed] = key;
+                totalAdded++;
+                print('[Resolved Conflict] Added "$key": "$processed"');
+                resolved = true;
+              }
+            }
           }
         } else {
           currentJson[key] = processed;
@@ -219,7 +280,9 @@ void main() {
         // Check preceding text for 'const'
         int searchPos = match.start - 1;
         while (searchPos >= 0 &&
-            (content[searchPos] == ' ' || content[searchPos] == '\t' || content[searchPos] == '\n')) {
+            (content[searchPos] == ' ' ||
+                content[searchPos] == '\t' ||
+                content[searchPos] == '\n')) {
           searchPos--;
         }
         if (searchPos >= 4) {
@@ -253,7 +316,7 @@ void main() {
       }
 
       if (changed) {
-        newContent = addImports(newContent);
+        newContent = addImports(newContent, packageName);
         file.writeAsStringSync(newContent);
         print('Modified ${file.path}');
       }
@@ -283,9 +346,21 @@ void main() {
 
   // 5. Save JSON
   if (totalAdded > 0) {
+    if (!langFile.existsSync()) {
+      print('Creating new localization file: ${langFile.path}');
+      langFile.createSync(recursive: true);
+    }
     const encoder = JsonEncoder.withIndent('  ');
     langFile.writeAsStringSync(encoder.convert(currentJson));
     print('Updated ${langFile.path}');
+  }
+
+  if (ignoredLog.isNotEmpty) {
+    print('\nIgnored Strings:');
+    final sortedIgnored = ignoredLog.toList()..sort();
+    for (final s in sortedIgnored) {
+      print('  - "$s"');
+    }
   }
 
   print('Summary:');
@@ -331,14 +406,16 @@ void runBuildCommands() {
     }
 
     if (result.exitCode != 0) {
-      print('Command failed with exit code ${result.exitCode}. Stopping execution.');
+      print(
+        'Command failed with exit code ${result.exitCode}. Stopping execution.',
+      );
       exit(result.exitCode);
     }
   }
   print('All commands executed successfully.');
 }
 
-String addImports(String content) {
+String addImports(String content, String packageName) {
   bool hasUtils = content.contains('string_extension.dart');
   bool hasKeys = content.contains('app_strings.g.dart');
 
@@ -352,16 +429,31 @@ String addImports(String content) {
       String remainder = content.substring(lineEnd + 1);
 
       StringBuffer insertions = StringBuffer();
-      if (!hasUtils)
-        insertions.writeln("\nimport 'package:face_match/framework/utils/extension/string_extension.dart';");
-      if (!hasKeys) insertions.writeln("import 'package:face_match/ui/utils/theme/app_strings.g.dart';");
+      if (!hasUtils) {
+        insertions.writeln(
+          "\nimport 'package:$packageName/framework/utils/extension/string_extension.dart';",
+        );
+      }
+      if (!hasKeys) {
+        insertions.writeln(
+          "import 'package:$packageName/ui/utils/theme/app_strings.g.dart';",
+        );
+      }
 
       return existing + insertions.toString() + remainder;
     }
   } else {
     StringBuffer insertions = StringBuffer();
-    if (!hasUtils) insertions.writeln("import 'package:face_match/framework/utils/extension/string_extension.dart';");
-    if (!hasKeys) insertions.writeln("import 'package:face_match/ui/utils/theme/app_strings.g.dart';");
+    if (!hasUtils) {
+      insertions.writeln(
+        "import 'package:$packageName/framework/utils/extension/string_extension.dart';",
+      );
+    }
+    if (!hasKeys) {
+      insertions.writeln(
+        "import 'package:$packageName/ui/utils/theme/app_strings.g.dart';",
+      );
+    }
     return insertions.toString() + content;
   }
   return content;

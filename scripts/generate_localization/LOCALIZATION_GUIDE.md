@@ -1,4 +1,4 @@
-# Localization Extraction Script
+# Keyify
 
 This directory contains `generate_localization.dart`, a powerful script that automates the process of internationalizing your Flutter app.
 
@@ -7,8 +7,10 @@ This directory contains `generate_localization.dart`, a powerful script that aut
 *   **Automated Extraction**: Scans `lib/` for hardcoded UI strings in `Text widgets`, named arguments (e.g., `hintText`, `label`), and validators.
 *   **Smart Filtering**: Automatically ignores dates, times, numbers, symbols, and developer-defined patterns.
 *   **Key Generation**: Converts "Hello World" -> `keyHelloWorld` automatically.
-*   **Code Replacement**: Replaces original strings in your Dart code with `LocaleKeys.keyName.localized` and adds necessary imports.
+*   **Code Replacement**: Replaces original strings in your Dart code with `LocaleKeys.keyName.localized` and adds necessary imports (`string_extension.dart`, `app_strings.g.dart`).
+*   **Dynamic Package Detection**: Automatically detects your package name from `pubspec.yaml` to ensure correct imports.
 *   **Conflict Prevention**: Checks for existing keys in `en.json` to prevent duplicates.
+*   **Ignored Strings Logging**: Outputs a sorted list of all ignored strings to the console for transparency.
 *   **Auto-Build**: Automatically runs `codogen` commands after updating strings.
 
 ## 🛠 Configuration
@@ -46,7 +48,7 @@ You can customize what the script specifically ignores by editing **`localizatio
 Execute the script from the project root:
 
 ```bash
-dart run scripts/generate_localization/generate_localization.dart
+dart run generate_localization/generate_localization.dart
 ```
 
 The script will:
@@ -54,7 +56,7 @@ The script will:
 2.  Scan all `.dart` files in `lib/` (skipping ignored ones).
 3.  Update `en.json` with new strings.
 4.  Modify your `.dart` files to use the new keys.
-5.  Run `flutter clean`, `build_runner`, `easy_localization`, and `flutter_gen` automatically.
+5.  Run `flutter clean`, `build_runner`, `easy_localization`, `dart pub global activate flutter_gen`, and `fluttergen` automatically.
 
 ## 🛑 Ignoring Files
 
