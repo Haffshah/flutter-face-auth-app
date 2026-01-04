@@ -2,6 +2,10 @@
 
 A cutting-edge Flutter application showcasing high-performance **Face Recognition and Matching** using a hybrid approach combining TensorFlow Lite and Regula FaceSDK.
 
+## 🎥 Preview
+Watch the demo video here: [Preview Video](https://drive.google.com/file/d/1Det5s7k9oKwOOw_ZxuHX2n-98W8ov2w-/view?usp=sharing)
+
+
 ## ✨ Key Features
 
 - 👤 **User Management**:
