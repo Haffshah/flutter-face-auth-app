@@ -18,13 +18,10 @@ import 'package:face_match/ui/utils/widgets/common_image.dart';
 import 'package:face_match/framework/utils/extension/string_extension.dart';
 import 'package:face_match/ui/utils/theme/app_strings.g.dart';
 
-
-
 final userRegistrationControllerProvider = ChangeNotifierProvider.autoDispose<UserRegistrationController>(
   (ref) => getIt<UserRegistrationController>(),
 );
 final userRepositoryProvider = Provider<UserRepository>((ref) => getIt<UserRepository>());
-
 
 class UserRegistrationScreen extends ConsumerStatefulWidget {
   final UserEntity? user;
@@ -213,7 +210,7 @@ class _UserRegistrationScreenState extends ConsumerState<UserRegistrationScreen>
               // Illustration Card
               widget.user != null
                   ? // Edit mode - show current photo
-                  CommonCard(
+                    CommonCard(
                       elevation: 4,
                       cornerRadius: 20.r,
                       color: AppColors.backgroundCard,
@@ -224,7 +221,7 @@ class _UserRegistrationScreenState extends ConsumerState<UserRegistrationScreen>
                             ClipOval(
                               child: CommonImage(
                                 strIcon: widget.user!.imagePath,
-                                isFileImage: true,
+                                isFileImage: !widget.user!.imagePath.startsWith('http'),
                                 height: 120.h,
                                 width: 120.h,
                                 boxFit: BoxFit.cover,
@@ -246,46 +243,46 @@ class _UserRegistrationScreenState extends ConsumerState<UserRegistrationScreen>
                       ),
                     )
                   : // Create mode - show illustration
-              CommonCard(
-                elevation: 4,
-                cornerRadius: 20.r,
-                color: AppColors.primary.withAlpha(13),
-                child: Padding(
-                  padding: EdgeInsets.all(32.w),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(24.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundCard,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withAlpha(51),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
+                    CommonCard(
+                      elevation: 4,
+                      cornerRadius: 20.r,
+                      color: AppColors.primary.withAlpha(13),
+                      child: Padding(
+                        padding: EdgeInsets.all(32.w),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(24.w),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundCard,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withAlpha(51),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(Icons.face_retouching_natural, size: 80.sp, color: AppColors.primary),
+                            ),
+                            SizedBox(height: 20.h),
+                            CommonText(
+                              title: LocaleKeys.keyRegisterNewUser.localized,
+                              textStyle: TextStyles.bold.copyWith(fontSize: 20.sp, color: AppColors.textPrimary),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 8.h),
+                            CommonText(
+                              title: LocaleKeys.keyEnterUserDetailsAndCaptureFaceImage.localized,
+                              textStyle: TextStyles.regular.copyWith(fontSize: 14.sp, color: AppColors.textSecondary),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
                             ),
                           ],
                         ),
-                        child: Icon(Icons.face_retouching_natural, size: 80.sp, color: AppColors.primary),
                       ),
-                      SizedBox(height: 20.h),
-                      CommonText(
-                        title: LocaleKeys.keyRegisterNewUser.localized,
-                        textStyle: TextStyles.bold.copyWith(fontSize: 20.sp, color: AppColors.textPrimary),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 8.h),
-                      CommonText(
-                        title: LocaleKeys.keyEnterUserDetailsAndCaptureFaceImage.localized,
-                        textStyle: TextStyles.regular.copyWith(fontSize: 14.sp, color: AppColors.textSecondary),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
 
               SizedBox(height: 32.h),
 
@@ -366,8 +363,8 @@ class _UserRegistrationScreenState extends ConsumerState<UserRegistrationScreen>
                 buttonText: controller.isProcessing
                     ? 'Processing...'
                     : widget.user != null
-                        ? 'Update Photo'
-                        : 'Capture Face Image',
+                    ? 'Update Photo'
+                    : 'Capture Face Image',
                 isLoading: controller.isProcessing,
                 isButtonEnabled: controller.isInitialized && !controller.isProcessing,
                 buttonEnabledColor: AppColors.primary,
@@ -424,15 +421,14 @@ class _UserRegistrationScreenState extends ConsumerState<UserRegistrationScreen>
 
   void _updateNameOnly() {
     if (widget.user == null) return;
-    
+
     final updatedUser = UserEntity(name: _nameController.text.trim(), imagePath: widget.user!.imagePath);
     updatedUser.id = widget.user!.id;
-    
+
     ref.read(userRepositoryProvider).saveUser(updatedUser);
     ref.read(navigationStackController).pop();
     ref.read(userListControllerProvider).loadUsers();
-    
+
     _showSnackBar('Name Updated Successfully!', false);
   }
-
 }

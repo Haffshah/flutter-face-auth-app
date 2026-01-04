@@ -13,7 +13,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:face_match/framework/utils/extension/string_extension.dart';
 import 'package:face_match/ui/utils/theme/app_strings.g.dart';
 
-
 final faceMatchControllerProvider = ChangeNotifierProvider.autoDispose<FaceMatchController>(
   (ref) => getIt<FaceMatchController>(),
 );
@@ -129,13 +128,17 @@ class _FaceScanScreenState extends ConsumerState<FaceScanScreen> with BaseConsum
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.success.withAlpha(128), width: 3.w),
                           boxShadow: [
-                            BoxShadow(color: AppColors.success.withAlpha(51), blurRadius: 12, offset: const Offset(0, 4)),
+                            BoxShadow(
+                              color: AppColors.success.withAlpha(51),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
                           ],
                         ),
                         child: ClipOval(
                           child: CommonImage(
                             strIcon: controller.matchedUser!.imagePath,
-                            isFileImage: true,
+                            isFileImage: !controller.matchedUser!.imagePath.startsWith('http'),
                             height: 100.h,
                             width: 100.h,
                             boxFit: BoxFit.cover,

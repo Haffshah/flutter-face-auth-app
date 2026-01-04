@@ -15,7 +15,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:face_match/framework/utils/extension/string_extension.dart';
 import 'package:face_match/ui/utils/theme/app_strings.g.dart';
 
-
 class UserListScreen extends ConsumerStatefulWidget {
   const UserListScreen({super.key});
 
@@ -86,7 +85,10 @@ class _UserListScreenState extends ConsumerState<UserListScreen> with BaseConsum
           : controller.users.isEmpty
           ? SizedBox(
               height: context.height * 0.8,
-              child: EmptyStateWidget(title: LocaleKeys.keyNoUsersYet.localized, description: LocaleKeys.keyStartByRegisteringYourFirstUser.localized),
+              child: EmptyStateWidget(
+                title: LocaleKeys.keyNoUsersYet.localized,
+                description: LocaleKeys.keyStartByRegisteringYourFirstUser.localized,
+              ),
             )
           : ListView.separated(
               itemCount: controller.users.length,
@@ -180,7 +182,7 @@ class _UserListScreenState extends ConsumerState<UserListScreen> with BaseConsum
                             child: ClipOval(
                               child: CommonImage(
                                 strIcon: user.imagePath,
-                                isFileImage: true,
+                                isFileImage: !user.imagePath.startsWith('http'),
                                 height: 60.h,
                                 width: 60.h,
                                 boxFit: BoxFit.cover,

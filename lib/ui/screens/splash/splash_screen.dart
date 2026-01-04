@@ -3,11 +3,10 @@ import 'package:face_match/framework/dependency_injection/inject.dart';
 import 'package:face_match/ui/utils/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:face_match/framework/utils/extension/string_extension.dart';
 import 'package:face_match/ui/utils/theme/app_strings.g.dart';
-
 
 final splashControllerProvider = ChangeNotifierProvider.autoDispose<SplashController>(
   (ref) => getIt<SplashController>(),
@@ -69,7 +68,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
               // Title - Clean typography
               Text(
                 LocaleKeys.keyFaceMatch.localized,
-                style: GoogleFonts.outfit(
+                style: TextStyle(
+                  fontFamily: 'Lexend',
                   fontSize: 36,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -81,7 +81,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
               // Subtitle - Subtle
               Text(
                 LocaleKeys.keySecureFastReliable.localized,
-                style: GoogleFonts.inter(
+                style: TextStyle(
+                  fontFamily: 'Lexend',
                   fontSize: 14,
                   color: AppColors.textSecondary,
                   letterSpacing: 1.0,
@@ -96,7 +97,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
               const SizedBox(height: 16),
               Text(
                 LocaleKeys.keyInitializing.localized,
-                style: GoogleFonts.inter(fontSize: 13, color: AppColors.textTertiary, letterSpacing: 0.5),
+                style: TextStyle(fontFamily: 'Lexend', fontSize: 13, color: AppColors.textTertiary, letterSpacing: 0.5),
               ),
             ],
           ),
